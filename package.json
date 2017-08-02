@@ -1,0 +1,17 @@
+{
+  "name": "lunch_bot",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Viktor Nawrath",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
+    "moment": "^2.18.1",
+    "request": "^2.81.0",
+    "slackbots": "^1.0.2"
+  }
+}
