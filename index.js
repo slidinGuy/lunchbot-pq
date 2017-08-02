@@ -3,7 +3,7 @@
 var LunchBot = require('./src/bot');
 
 var token = process.env.BOT_API_KEY;
-var fb_token = process.env.FB_API_TOKEN;
+var fb_token = process.env.FB_API_KEY;
 
 var lunch_bot = new LunchBot({
   token: token,

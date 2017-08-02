@@ -69,6 +69,7 @@ class LunchBot extends Bot {
     })[0];
   }
   _getMenu(restaurant_name){
+    var self = this;
     var url;
     switch (restaurant_name) {
       case 'basta':
@@ -82,7 +83,7 @@ class LunchBot extends Bot {
                 if($(this).text().indexOf(moment().format('D. MM. YYYY')) > -1){
                   menu = "Basta: \n ```";
                   $(this).siblings().each(function(){
-                    menu += $(this).text().trim();
+                    menu += $(this).text().replace(/\s+/g, ' ').trim();
                     menu += "\n";
                   });
                   menu += '```';
@@ -100,7 +101,7 @@ class LunchBot extends Bot {
           request(url, function(e, r, html){
             if(!e){
               const $ = cheerio.load(html);
-              var days = ["Pondělí", "Úterý", "Středa", "Čtrvtek", "Pátek"];
+              var days = ["Pondělí", "Úterý", "Středa", "Čtvrtek", "Pátek"];
               var today = moment().day();
               var index = today * 6;
               var menu = $(`tbody tr:nth-child(${index})`).text().replace(/\n/g, '');
@@ -108,7 +109,10 @@ class LunchBot extends Bot {
                 menu = "Jarosi: \n ```" + menu.trim();
                 for(var i = 1; i<6; i++){
                   menu += "\n";
-                  menu += $(`tbody tr:nth-child(${index + i})`).text().replace(/\n/g, '').trim();
+                  menu += $(`tbody tr:nth-child(${index + i})`).text()
+                                                               .replace(/\n/g, '')
+                                                               .replace(/\s+/g, ' ')
+                                                               .trim();
                 }
                 menu += '```';
               }else{
@@ -121,18 +125,20 @@ class LunchBot extends Bot {
           });
         });
       case 'kovork':
-        url = `https://graph.facebook.com/v2.10/kavarnakovork/feed?access_token=${this.fb_token}`;
+        url = `https://graph.facebook.com/v2.10/kavarnakovork/feed?access_token=${self.fb_token}`;
         return new Promise(function(resolve, reject) {
           request(url, function(e, r, html){
             if(!e){
               var menu = "Sorry, I couldn't find menu for today.";
               var json = JSON.parse(html);
-              for( var i = 0; i < 7; i++){
-                var text = decodeURIComponent(json.data[i].message);
-                if (text.indexOf(moment().format('D.M.YYYY')) > -1){
-                  menu = "Kovork: \n ```"
-                  menu += text.replace(/\n\n/g, '\n');
-                  menu += '```';
+              if(json.data){
+                for( var i = 0; i < 7; i++){
+                  var text = decodeURIComponent(json.data[i].message);
+                  if (text.indexOf(moment().format('D.M.YYYY')) > -1){
+                    menu = "Kovork: \n ```"
+                    menu += text.replace(/\n\n/g, '\n');
+                    menu += '```';
+                  }
                 }
               }
               resolve(menu);
