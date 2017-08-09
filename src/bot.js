@@ -12,6 +12,7 @@ class LunchBot extends Bot {
     this.name = 'lunchbot';
     this.user = null;
     this.fb_token = settings.fb_token;
+    this.zomato_token = settings.zomato_token;
   }
   handleOnStart() {
     var self = this;
@@ -37,37 +38,27 @@ class LunchBot extends Bot {
   }
   _checkMessageContent(message){
     const self = this;
-    if(message.text.indexOf(':basta:') > -1){
-      self._getMenu('basta').then(function(menu){
-        self._replyToMessage(message, menu);
-      }).catch(function(e){
-        console.log(e);
-      });
-    }
-    if(message.text.indexOf(':jarosi:') > -1){
-      self._getMenu('jarosi').then(function(menu){
-        self._replyToMessage(message, menu);
-      }).catch(function(e){
-        console.log(e);
-      });
-    }
-    if(message.text.indexOf(':kovork:') > -1){
-      self._getMenu('kovork').then(function(menu){
-        self._replyToMessage(message, menu);
-      }).catch(function(e){
-        console.log(e);
-      });
+    const restaurants = [
+      //Ova
+      'basta', 'jarosi', 'kovork',
+      //NJ
+      'daniela'
+    ];
+    for (var restaurant_name of restaurants) {
+      if(message.text.indexOf(`:${restaurant_name}:`) > -1){
+        self._getMenu(restaurant_name).then(function(menu){
+          self._replyToMessage(message, menu);
+        }).catch(function(e){
+          console.log(e);
+        });
+      }
     }
   }
+
   _replyToMessage(originalMessage, response){
-    // const channel = this._getChannelById(originalMessage.channel);
     this.postMessage(originalMessage.channel, response, { as_user: true })
   }
-  _getChannelById(channelId){
-    return this.channels.filter(function (item) {
-      return item.id === channelId;
-    })[0];
-  }
+
   _getMenu(restaurant_name){
     var self = this;
     var url;
@@ -102,18 +93,26 @@ class LunchBot extends Bot {
             if(!e){
               const $ = cheerio.load(html);
               var days = ["Pondělí", "Úterý", "Středa", "Čtvrtek", "Pátek"];
-              var today = moment().day();
-              var index = today * 6;
-              var menu = $(`tbody tr:nth-child(${index})`).text().replace(/\n/g, '');
-              if (menu.indexOf(days[today - 1]) > -1){
-                menu = "Jarosi: \n ```" + menu.trim();
-                for(var i = 1; i<6; i++){
-                  menu += "\n";
-                  menu += $(`tbody tr:nth-child(${index + i})`).text()
-                                                               .replace(/\n/g, '')
-                                                               .replace(/\s+/g, ' ')
-                                                               .trim();
+              var today = moment().day() - 1;
+              var found = 0;
+              var menu = "";
+              $('tr').each(function(i, el){
+                let text = $(this).text().replace(/\n/g, '').replace(/\s+/g, ' ').trim();
+                if(found == 0 && text.indexOf(days[today]) == 0){
+                  found = 1
+                  menu = "Jarosi: \n ```";
+                  menu += text.trim();
+                } else if (found > 0){
+                  if(text.indexOf(days[today+1]) > -1 || found > 5){
+                    return;
+                  } else {
+                    menu += '\n';
+                    menu += text;
+                    found++;
+                  }
                 }
+              });
+              if (found > 0){
                 menu += '```';
               }else{
                 menu = "Sorry, I couldn't find menu for today.";
@@ -138,6 +137,34 @@ class LunchBot extends Bot {
                     menu = "Kovork: \n ```"
                     menu += text.replace(/\n\n/g, '\n');
                     menu += '```';
+                  }
+                }
+              }
+              resolve(menu);
+            }else{
+              reject(e);
+            }
+          });
+        });
+      case 'daniela':
+        url = 'https://developers.zomato.com/api/v2.1/dailymenu?res_id=16513150';
+        return new Promise(function(resolve, reject) {  
+          request({
+            url: url,
+            headers: { 'user_key' : self.zomato_token }
+          }, function(e, r, html){
+            if(!e){
+              var json = JSON.parse(html);
+              var menu = "Sorry, I couldn't find menu for today.";
+              if(json['daily_menus']){
+                for (var daily_menu of json['daily_menus']){
+                  if(moment().isSame(daily_menu['daily_menu']['start_date'], 'day')){
+                      menu = "Daniela:\n ```";
+                      for(var dish of daily_menu['daily_menu']['dishes']){
+                        menu += dish['dish']['name'];
+                        menu += '\n';
+                      }
+                      menu += '```';
                   }
                 }
               }
