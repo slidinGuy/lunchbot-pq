@@ -31,7 +31,9 @@ class LunchBot extends Bot {
     return (message.type === 'message') &&
            Boolean(message) &&
            (typeof(message.channel) === 'string') &&
-           (message.channel[0] === 'C' || message.channel[0] === 'G');
+           (message.channel[0] === 'C' ||
+            message.channel[0] === 'G' ||
+            message.channel[0] === 'D');
   }
   _isFromLunchBot(message){
     return message.user === this.user.id;
@@ -42,7 +44,7 @@ class LunchBot extends Bot {
       //Ova
       'basta', 'jarosi', 'kovork',
       //NJ
-      'daniela'
+      'daniela', 'art', 'nano', 'cech'
     ];
     for (var restaurant_name of restaurants) {
       if(message.text.indexOf(`:${restaurant_name}:`) > -1){
@@ -147,34 +149,61 @@ class LunchBot extends Bot {
           });
         });
       case 'daniela':
-        url = 'https://developers.zomato.com/api/v2.1/dailymenu?res_id=16513150';
-        return new Promise(function(resolve, reject) {  
-          request({
-            url: url,
-            headers: { 'user_key' : self.zomato_token }
-          }, function(e, r, html){
-            if(!e){
-              var json = JSON.parse(html);
-              var menu = "Sorry, I couldn't find menu for today.";
-              if(json['daily_menus']){
-                for (var daily_menu of json['daily_menus']){
-                  if(moment().isSame(daily_menu['daily_menu']['start_date'], 'day')){
-                      menu = "Daniela:\n ```";
-                      for(var dish of daily_menu['daily_menu']['dishes']){
-                        menu += dish['dish']['name'];
-                        menu += '\n';
-                      }
-                      menu += '```';
-                  }
-                }
-              }
-              resolve(menu);
-            }else{
-              reject(e);
-            }
-          });
-        });
+      case 'art':
+      case 'nano':
+      case 'cech':
+        return self._getZomatoMenu(restaurant_name);
     }
+  }
+
+  _getZomatoMenu(keyword){
+    const self = this;
+    const rest_info = {
+      'daniela': {
+        'id': '16513150',
+        'name': 'Daniela'
+      },
+      'art': {
+        'id': '16513855',
+        'name': 'Art Cafe'
+      },
+      'nano': {
+        'id': '16513503',
+        'name': 'Pizzeria Nano'
+      },
+      'cech': {
+        'id': '16525386',
+        'name': 'Cechovní dům'
+      }
+    }[keyword];
+    const url = `https://developers.zomato.com/api/v2.1/dailymenu?res_id=${rest_info.id}`;
+    return new Promise(function(resolve, reject) {  
+      request({
+        url: url,
+        headers: { 'user_key' : self.zomato_token }
+      }, function(e, r, html){
+        if(!e){
+          var json = JSON.parse(html);
+          var menu = "Sorry, I couldn't find menu for today.";
+          if(json['daily_menus']){
+            for (var daily_menu of json['daily_menus']){
+              if(moment().isSame(daily_menu['daily_menu']['start_date'], 'day') &&
+                 daily_menu['daily_menu']['end_date'] !== undefined){
+                  menu = `${rest_info.name}:` + "\n ```";
+                  for(var dish of daily_menu['daily_menu']['dishes']){
+                    menu += dish['dish']['name'];
+                    menu += '\n';
+                  }
+                  menu += '```';
+              }
+            }
+          }
+          resolve(menu);
+        }else{
+          reject(e);
+        }
+      });
+    });
   }
 }
 
