@@ -17,7 +17,7 @@ class LunchBot extends Bot {
             //Ova
             {
                 keyWord: 'basta',
-                url: 'http://www.pustkoveckabasta.cz/denni-menu/',
+                url: 'http://www.pustkoveckabasta.cz/pustkovecka-basta',
                 response: 'Basta:',
                 type: 'basta'
             },
@@ -41,7 +41,7 @@ class LunchBot extends Bot {
                 type: 'zomato'
             },
             {
-                keyWord: 'art',
+                keyWord: 'artcafe',
                 url: this.getZomatoUrl('16513855'),
                 response: 'Art Cafe:',
                 type: 'zomato'
@@ -128,12 +128,8 @@ class LunchBot extends Bot {
                 if (!e) {
                     const $ = cheerio.load(html);
                     let menu = [];
-                    $('.title').each(function () {
-                        if ($(this).text().indexOf(moment().format('D. MM. YYYY')) > -1) {
-                            $(this).siblings().each(function () {
-                                menu.push($(this).text().replace(/\s+/g, ' ').trim());
-                            });
-                        }
+                    $('.daily-item.today li').each(function () {
+                        menu.push($(this).text().replace(/\s+/g, ' ').trim());
                     });
                     resolve(menu.join("\n"));
                 } else {
