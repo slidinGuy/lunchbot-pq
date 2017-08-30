@@ -6,6 +6,9 @@ const cheerio = require('cheerio');
 const moment = require('moment');
 const Bot = require('slackbots');
 
+// Restaurants definition
+const restaurants = require('./restaurants.json');
+
 class LunchBot extends Bot {
     constructor(settings) {
         super(settings);
@@ -13,52 +16,6 @@ class LunchBot extends Bot {
         this.user = null;
         this.fb_token = settings.fb_token;
         this.zomato_token = settings.zomato_token;
-        this.restaurants = [
-            //Ova
-            {
-                keyWord: 'basta',
-                url: 'http://www.pustkoveckabasta.cz/pustkovecka-basta',
-                response: 'Basta:',
-                type: 'basta'
-            },
-            {
-                keyWord: 'jarosi',
-                url: 'http://www.ujarosu.cz/cz/denni-menu/',
-                response: 'Jarosi:',
-                type: 'jarosi'
-            },
-            {
-                keyWord: 'kovork',
-                url: `https://graph.facebook.com/v2.10/kavarnakovork/feed?access_token=${this.fb_token}`,
-                response: 'Kovork:',
-                type: 'kovork'
-            },
-            //NJ
-            {
-                keyWord: 'daniela',
-                url: this.getZomatoUrl('16513150'),
-                response: 'Daniela:',
-                type: 'zomato'
-            },
-            {
-                keyWord: 'artcafe',
-                url: this.getZomatoUrl('16513855'),
-                response: 'Art Cafe:',
-                type: 'zomato'
-            },
-            {
-                keyWord: 'nano',
-                url: this.getZomatoUrl('16513503'),
-                response: 'Pizzeria Nano:',
-                type: 'zomato'
-            },
-            {
-                keyWord: 'cech',
-                url: this.getZomatoUrl('16525386'),
-                response: 'Cechovní dům:',
-                type: 'zomato'
-            },
-        ];
     }
 
     handleOnStart() {
@@ -86,7 +43,7 @@ class LunchBot extends Bot {
     }
 
     checkMessageContent(message) {
-        this.restaurants.map((restaurant) => {
+        restaurants.map((restaurant) => {
             const restaurant_name = restaurant.keyWord;
             if (message.text && message.text.indexOf(`:${restaurant_name}:`) > -1) {
                 this.getMenu(restaurant)
@@ -174,7 +131,8 @@ class LunchBot extends Bot {
     }
 
     getKovork(restaurant) {
-        return this.getData(restaurant.url)
+        const url =  `${restaurant.url}?access_token=${this.fb_token}`;
+        return this.getData(url)
             .then((html) => {
                 var json = JSON.parse(html);
                 if (json.data) {
@@ -190,13 +148,14 @@ class LunchBot extends Bot {
             });
     }
 
-    getZomatoUrl(id) {
+    createZomatoUrl(id) {
         return `https://developers.zomato.com/api/v2.1/dailymenu?res_id=${id}`;
     }
 
     getZomato(restaurant) {
         const self = this;
-        return this.getData(restaurant.url,
+        const url = this.createZomatoUrl(restaurant.id);
+        return this.getData(url,
             {
                 headers: {
                     'user_key': self.zomato_token

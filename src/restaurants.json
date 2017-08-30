@@ -1,0 +1,44 @@
+[
+    {
+        "keyWord": "basta",
+        "url": "http://www.pustkoveckabasta.cz/pustkovecka-basta",
+        "response": "Basta:",
+        "type": "basta"
+    },
+    {
+        "keyWord": "jarosi",
+        "url": "http://www.ujarosu.cz/cz/denni-menu/",
+        "response": "Jarosi:",
+        "type": "jarosi"
+    },
+    {
+        "keyWord": "kovork",
+        "url": "https://graph.facebook.com/v2.10/kavarnakovork/feed",
+        "response": "Kovork:",
+        "type": "kovork"
+    },
+    {
+        "keyWord": "daniela",
+        "id": "16513150",
+        "response": "Daniela:",
+        "type": "zomato"
+    },
+    {
+        "keyWord": "artcafe",
+        "id": "16513855",
+        "response": "Art Cafe:",
+        "type": "zomato"
+    },
+    {
+        "keyWord": "nano",
+        "id": "16513503",
+        "response": "Pizzeria Nano:",
+        "type": "zomato"
+    },
+    {
+        "keyWord": "cech",
+        "id": "16525386",
+        "response": "Cechovní dům:",
+        "type": "zomato"
+    }
+]
