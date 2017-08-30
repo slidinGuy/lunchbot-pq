@@ -122,77 +122,72 @@ class LunchBot extends Bot {
         }
     }
 
-    getBasta(restaurant) {
+    getData (url, options) {
         return new Promise(function (resolve, reject) {
-            request(restaurant.url, function (e, r, html) {
-                if (!e) {
-                    const $ = cheerio.load(html);
-                    let menu = [];
-                    $('.daily-item.today li').each(function () {
-                        menu.push($(this).text().replace(/\s+/g, ' ').trim());
-                    });
-                    resolve(menu.join("\n"));
-                } else {
-                    reject(e);
+            request(Object.assign({url}, options),
+                function (error, response, body) {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(body);
+                    }
                 }
-            });
+            );
         });
+    }
+
+    getBasta(restaurant) {
+        return this.getData(restaurant.url)
+            .then((html) => {
+                const $ = cheerio.load(html);
+                let menu = [];
+                $('.daily-item.today li').each(function () {
+                    menu.push($(this).text().replace(/\s+/g, ' ').trim());
+                });
+                return menu.join("\n");
+            });
     }
 
     getJarosi(restaurant) {
-        return new Promise(function (resolve, reject) {
-            request(restaurant.url, function (e, r, html) {
-                if (!e) {
-                    const $ = cheerio.load(html);
-                    const days = ["Pondělí", "Úterý", "Středa", "Čtvrtek", "Pátek"];
-                    const today = moment().day() - 1;
-                    let menu = [];
-                    $('tr').each(function (i, el) {
-                        let text = $(this).text().replace(/\n/g, '').replace(/\s+/g, ' ').trim();
-                        if (!menu.length && text.indexOf(days[today]) == 0) {
-                            menu.push(text.trim());
-                        } else if (menu.length) {
-                            if (text.indexOf(days[today + 1]) > -1 || menu.length > 5) {
-                                return;
-                            } else {
-                                menu.push(text);
-                            }
+        return this.getData(restaurant.url)
+            .then((html) => {
+                const $ = cheerio.load(html);
+                const days = ["Pondělí", "Úterý", "Středa", "Čtvrtek", "Pátek"];
+                const today = moment().day() - 1;
+                let menu = [];
+                $('tr').each(function (i, el) {
+                    let text = $(this).text().replace(/\n/g, '').replace(/\s+/g, ' ').trim();
+                    if (!menu.length && text.indexOf(days[today]) == 0) {
+                        menu.push(text.trim());
+                    } else if (menu.length) {
+                        if (text.indexOf(days[today + 1]) > -1 || menu.length > 5) {
+                            return;
+                        } else {
+                            menu.push(text);
                         }
-                    });
-                    if (menu.length) {
-                        resolve(menu.join("\n"));
-                    } else {
-                        resolve();
                     }
-                } else {
-                    reject(e);
+                });
+                if (menu.length) {
+                    return menu.join("\n");
                 }
             });
-        });
     }
 
     getKovork(restaurant) {
-        return new Promise(function (resolve, reject) {
-            request(restaurant.url, function (e, r, html) {
-                if (!e) {
-                    var json = JSON.parse(html);
-                    if (json.data) {
-                        let menu = "";
-                        for (var i = 0; i < 7; i++) {
-                            var text = decodeURIComponent(json.data[i].message);
-                            if (text.indexOf(moment().format('D.M.YYYY')) > -1) {
-                                menu += text.replace(/\n\n/g, '\n');
-                            }
+        return this.getData(restaurant.url)
+            .then((html) => {
+                var json = JSON.parse(html);
+                if (json.data) {
+                    let menu = "";
+                    for (var i = 0; i < 7; i++) {
+                        var text = decodeURIComponent(json.data[i].message);
+                        if (text.indexOf(moment().format('D.M.YYYY')) > -1) {
+                            menu += text.replace(/\n\n/g, '\n');
                         }
-                        resolve(menu);
-                    } else {
-                        resolve();
                     }
-                } else {
-                    reject(e);
+                    return  menu;
                 }
             });
-        });
     }
 
     getZomatoUrl(id) {
@@ -201,34 +196,27 @@ class LunchBot extends Bot {
 
     getZomato(restaurant) {
         const self = this;
-        return new Promise(function (resolve, reject) {
-            request({
-                url: restaurant.url,
+        return this.getData(restaurant.url,
+            {
                 headers: {
                     'user_key': self.zomato_token
                 }
-            }, function (e, r, html) {
-                if (!e) {
-                    var json = JSON.parse(html);
-                    if (json['daily_menus']) {
-                        let menu = [];
-                        for (var daily_menu of json['daily_menus']) {
-                            if (moment().isSame(daily_menu['daily_menu']['start_date'], 'day') &&
-                                daily_menu['daily_menu']['end_date'] !== undefined) {
-                                for (var dish of daily_menu['daily_menu']['dishes']) {
-                                    menu.push(dish['dish']['name']);
-                                }
+            })
+            .then((html) => {
+                var json = JSON.parse(html);
+                if (json['daily_menus']) {
+                    let menu = [];
+                    for (var daily_menu of json['daily_menus']) {
+                        if (moment().isSame(daily_menu['daily_menu']['start_date'], 'day') &&
+                            daily_menu['daily_menu']['end_date'] !== undefined) {
+                            for (var dish of daily_menu['daily_menu']['dishes']) {
+                                menu.push(dish['dish']['name']);
                             }
                         }
-                        resolve(menu.join("\n"));
-                    } else {
-                        resolve();
                     }
-                } else {
-                    reject(e);
+                    return menu.join("\n");
                 }
             });
-        });
     }
 }
 
