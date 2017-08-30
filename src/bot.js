@@ -44,8 +44,8 @@ class LunchBot extends Bot {
 
     checkMessageContent(message) {
         restaurants.map((restaurant) => {
-            const restaurant_name = restaurant.keyWord;
-            if (message.text && message.text.indexOf(`:${restaurant_name}:`) > -1) {
+            const keyWords = restaurant.keyWords.map((k) => `:${k}:`);
+            if (message.text && keyWords.some((kw) => message.text.includes(kw))) {
                 this.getMenu(restaurant)
                     .then((menu) => this.createResponse(restaurant, menu))
                     .then((response) => this.replyToMessage(message, response))
