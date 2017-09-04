@@ -6,6 +6,9 @@ const cheerio = require('cheerio');
 const moment = require('moment');
 const Bot = require('slackbots');
 
+// Restaurants definition
+const restaurants = require('./restaurants.json');
+
 class LunchBot extends Bot {
     constructor(settings) {
         super(settings);
@@ -13,52 +16,6 @@ class LunchBot extends Bot {
         this.user = null;
         this.fb_token = settings.fb_token;
         this.zomato_token = settings.zomato_token;
-        this.restaurants = [
-            //Ova
-            {
-                keyWord: 'basta',
-                url: 'http://www.pustkoveckabasta.cz/pustkovecka-basta',
-                response: 'Basta:',
-                type: 'basta'
-            },
-            {
-                keyWord: 'jarosi',
-                url: 'http://www.ujarosu.cz/cz/denni-menu/',
-                response: 'Jarosi:',
-                type: 'jarosi'
-            },
-            {
-                keyWord: 'kovork',
-                url: `https://graph.facebook.com/v2.10/kavarnakovork/feed?access_token=${this.fb_token}`,
-                response: 'Kovork:',
-                type: 'kovork'
-            },
-            //NJ
-            {
-                keyWord: 'daniela',
-                url: this.getZomatoUrl('16513150'),
-                response: 'Daniela:',
-                type: 'zomato'
-            },
-            {
-                keyWord: 'artcafe',
-                url: this.getZomatoUrl('16513855'),
-                response: 'Art Cafe:',
-                type: 'zomato'
-            },
-            {
-                keyWord: 'nano',
-                url: this.getZomatoUrl('16513503'),
-                response: 'Pizzeria Nano:',
-                type: 'zomato'
-            },
-            {
-                keyWord: 'cech',
-                url: this.getZomatoUrl('16525386'),
-                response: 'Cechovní dům:',
-                type: 'zomato'
-            },
-        ];
     }
 
     handleOnStart() {
@@ -86,9 +43,9 @@ class LunchBot extends Bot {
     }
 
     checkMessageContent(message) {
-        this.restaurants.map((restaurant) => {
-            const restaurant_name = restaurant.keyWord;
-            if (message.text && message.text.indexOf(`:${restaurant_name}:`) > -1) {
+        restaurants.map((restaurant) => {
+            const keyWords = restaurant.keyWords.map((k) => `:${k}:`);
+            if (message.text && keyWords.some((kw) => message.text.includes(kw))) {
                 this.getMenu(restaurant)
                     .then((menu) => this.createResponse(restaurant, menu))
                     .then((response) => this.replyToMessage(message, response))
@@ -122,113 +79,103 @@ class LunchBot extends Bot {
         }
     }
 
-    getBasta(restaurant) {
+    getData (url, options) {
         return new Promise(function (resolve, reject) {
-            request(restaurant.url, function (e, r, html) {
-                if (!e) {
-                    const $ = cheerio.load(html);
-                    let menu = [];
-                    $('.daily-item.today li').each(function () {
-                        menu.push($(this).text().replace(/\s+/g, ' ').trim());
-                    });
-                    resolve(menu.join("\n"));
-                } else {
-                    reject(e);
+            request(Object.assign({url}, options),
+                function (error, response, body) {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(body);
+                    }
                 }
-            });
+            );
         });
+    }
+
+    getBasta(restaurant) {
+        return this.getData(restaurant.url)
+            .then((html) => {
+                const $ = cheerio.load(html);
+                let menu = [];
+                $('.daily-item.today li').each(function () {
+                    menu.push($(this).text().replace(/\s+/g, ' ').trim());
+                });
+                return menu.join("\n");
+            });
     }
 
     getJarosi(restaurant) {
-        return new Promise(function (resolve, reject) {
-            request(restaurant.url, function (e, r, html) {
-                if (!e) {
-                    const $ = cheerio.load(html);
-                    const days = ["Pondělí", "Úterý", "Středa", "Čtvrtek", "Pátek"];
-                    const today = moment().day() - 1;
-                    let menu = [];
-                    $('tr').each(function (i, el) {
-                        let text = $(this).text().replace(/\n/g, '').replace(/\s+/g, ' ').trim();
-                        if (!menu.length && text.indexOf(days[today]) == 0) {
-                            menu.push(text.trim());
-                        } else if (menu.length) {
-                            if (text.indexOf(days[today + 1]) > -1 || menu.length > 5) {
-                                return;
-                            } else {
-                                menu.push(text);
-                            }
+        return this.getData(restaurant.url)
+            .then((html) => {
+                const $ = cheerio.load(html);
+                const days = ["Pondělí", "Úterý", "Středa", "Čtvrtek", "Pátek"];
+                const today = moment().day() - 1;
+                let menu = [];
+                $('tr').each(function (i, el) {
+                    let text = $(this).text().replace(/\n/g, '').replace(/\s+/g, ' ').trim();
+                    if (!menu.length && text.indexOf(days[today]) == 0) {
+                        menu.push(text.trim());
+                    } else if (menu.length) {
+                        if (text.indexOf(days[today + 1]) > -1 || menu.length > 5) {
+                            return;
+                        } else {
+                            menu.push(text);
                         }
-                    });
-                    if (menu.length) {
-                        resolve(menu.join("\n"));
-                    } else {
-                        resolve();
                     }
-                } else {
-                    reject(e);
+                });
+                if (menu.length) {
+                    return menu.join("\n");
                 }
             });
-        });
     }
 
     getKovork(restaurant) {
-        return new Promise(function (resolve, reject) {
-            request(restaurant.url, function (e, r, html) {
-                if (!e) {
-                    var json = JSON.parse(html);
-                    if (json.data) {
-                        let menu = "";
-                        for (var i = 0; i < 7; i++) {
-                            var text = decodeURIComponent(json.data[i].message);
-                            if (text.indexOf(moment().format('D.M.YYYY')) > -1) {
-                                menu += text.replace(/\n\n/g, '\n');
-                            }
+        const url =  `${restaurant.url}?access_token=${this.fb_token}`;
+        return this.getData(url)
+            .then((html) => {
+                var json = JSON.parse(html);
+                if (json.data) {
+                    let menu = "";
+                    for (var i = 0; i < 7; i++) {
+                        var text = decodeURIComponent(json.data[i].message);
+                        if (text.indexOf(moment().format('D.M.YYYY')) > -1) {
+                            menu += text.replace(/\n\n/g, '\n');
                         }
-                        resolve(menu);
-                    } else {
-                        resolve();
                     }
-                } else {
-                    reject(e);
+                    return  menu;
                 }
             });
-        });
     }
 
-    getZomatoUrl(id) {
+    createZomatoUrl(id) {
         return `https://developers.zomato.com/api/v2.1/dailymenu?res_id=${id}`;
     }
 
     getZomato(restaurant) {
         const self = this;
-        return new Promise(function (resolve, reject) {
-            request({
-                url: restaurant.url,
+        const url = this.createZomatoUrl(restaurant.id);
+        return this.getData(url,
+            {
                 headers: {
                     'user_key': self.zomato_token
                 }
-            }, function (e, r, html) {
-                if (!e) {
-                    var json = JSON.parse(html);
-                    if (json['daily_menus']) {
-                        let menu = [];
-                        for (var daily_menu of json['daily_menus']) {
-                            if (moment().isSame(daily_menu['daily_menu']['start_date'], 'day') &&
-                                daily_menu['daily_menu']['end_date'] !== undefined) {
-                                for (var dish of daily_menu['daily_menu']['dishes']) {
-                                    menu.push(dish['dish']['name']);
-                                }
+            })
+            .then((html) => {
+                var json = JSON.parse(html);
+                if (json['daily_menus']) {
+                    let menu = [];
+                    for (var daily_menu of json['daily_menus']) {
+                        if (moment().isSame(daily_menu['daily_menu']['start_date'], 'day') &&
+                            daily_menu['daily_menu']['end_date'] !== undefined) {
+                            for (var dish of daily_menu['daily_menu']['dishes']) {
+                                menu.push(dish['dish']['name']);
                             }
                         }
-                        resolve(menu.join("\n"));
-                    } else {
-                        resolve();
                     }
-                } else {
-                    reject(e);
+                    return menu.join("\n");
                 }
             });
-        });
     }
 }
 
