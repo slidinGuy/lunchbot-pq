@@ -24,6 +24,12 @@
         "type": "zomato"
     },
     {
+        "keyWords": ["uzvonu", "jicin"],
+        "id": "16514019",
+        "response": "Penzion U Zvonu:",
+        "type": "zomato"
+    },
+    {
         "keyWords": ["artcafe", "jicin"],
         "id": "16513855",
         "response": "Art Cafe:",
@@ -39,6 +45,18 @@
         "keyWords": ["cech", "jicin"],
         "id": "16525386",
         "response": "Cechovní dům:",
+        "type": "zomato"
+    },
+    {
+        "keyWords": ["colores", "jicin"],
+        "id": "16513597",
+        "response": "Colores:",
+        "type": "zomato"
+    },
+    {
+        "keyWords": ["mexiko", "mexico", "jicin"],
+        "id": "16513586",
+        "response": "Mexico Chiquito:",
         "type": "zomato"
     }
 ]
