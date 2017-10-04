@@ -32,10 +32,11 @@ class LunchBot extends Bot {
     }
 
     isChannelMessage(message) {
-        return (message.type === 'message') &&
-            Boolean(message) &&
-            (typeof (message.channel) === 'string') && ['C', 'G', 'D'].includes(message.channel[0]);
-    }
+        return message &&
+            (message.type === 'message') &&
+            (typeof (message.channel) === 'string') &&
+            ['C', 'G', 'D'].includes(message.channel[0]);
+   }
 
     isFromLunchBot(message) {
         return message.user === this.user.id;
