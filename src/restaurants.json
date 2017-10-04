@@ -3,60 +3,70 @@
         "keyWords": ["basta", "ostrava"],
         "url": "http://www.pustkoveckabasta.cz/pustkovecka-basta",
         "response": "Basta:",
-        "type": "basta"
+        "type": "basta",
+        "sourceType": "web"
     },
     {
         "keyWords": ["jarosi", "ostrava"],
         "url": "http://www.ujarosu.cz/cz/denni-menu/",
         "response": "Jarosi:",
-        "type": "jarosi"
+        "type": "jarosi",
+        "sourceType": "web"
     },
     {
         "keyWords": ["kovork", "ostrava"],
         "url": "https://graph.facebook.com/v2.10/kavarnakovork/feed",
         "response": "Kovork:",
-        "type": "kovork"
+        "type": "kovork",
+        "sourceType": "fb"
     },
     {
         "keyWords": ["daniela", "jicin"],
         "id": "16513150",
         "response": "Daniela:",
-        "type": "zomato"
+        "type": "zomato",
+        "sourceType": "zomato"
     },
     {
         "keyWords": ["uzvonu", "jicin"],
         "id": "16514019",
         "response": "Penzion U Zvonu:",
-        "type": "zomato"
+        "type": "zomato",
+        "sourceType": "zomato"
     },
     {
         "keyWords": ["artcafe", "jicin"],
         "id": "16513855",
         "response": "Art Cafe:",
-        "type": "zomato"
+        "type": "zomato",
+        "sourceType": "zomato"
     },
     {
         "keyWords": ["nano", "jicin"],
         "id": "16513503",
         "response": "Pizzeria Nano:",
-        "type": "zomato"
+        "type": "zomato",
+        "sourceType": "zomato"
     },
     {
         "keyWords": ["cech", "jicin"],
         "id": "16525386",
         "response": "Cechovní dům:",
-        "type": "zomato"
+        "type": "zomato",
+        "sourceType": "zomato"
     },
     {
         "keyWords": ["colores", "jicin"],
         "id": "16513597",
         "response": "Colores:",
-        "type": "zomato"
+        "type": "zomato",
+        "sourceType": "zomato"
     },
     {
         "keyWords": ["mexiko", "mexico", "jicin"],
         "id": "16513586",
         "response": "Mexico Chiquito:",
-        "type": "zomato"
+        "type": "zomato",
+        "sourceType": "zomato"
     }
 ]
