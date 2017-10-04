@@ -68,5 +68,12 @@
         "response": "Mexico Chiquito:",
         "type": "zomato",
         "sourceType": "zomato"
+    },
+    {
+        "keyWords": ["laudon", "jicin"],
+        "url": "http://www.laudon-nj.cz/denni-menu.php",
+        "response": "Laudon:",
+        "type": "laudon",
+        "sourceType": "web"
     }
 ]

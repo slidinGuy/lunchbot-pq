@@ -44,6 +44,7 @@ class MenuChecker {
             case 'jarosi': return this.parseJarosi(data);
             case 'kovork': return this.parseKovork(data);
             case 'zomato': return this.parseZomato(data);
+            case 'laudon': return this.parseLaudon(data);
         };
     }
 
@@ -120,6 +121,29 @@ class MenuChecker {
             });
             return menu.join("\n");
         }      
+    }
+
+    parseLaudon(html) {
+        const $ = cheerio.load(html);
+        const days = ["Pondělí", "Úterý", "Středa", "Čtvrtek", "Pátek"];
+        const today = moment().day() - 1;
+        const todayName = days[today];
+        let text = "";
+        $('div.text-tab-content').each(function () {
+            text += $(this).text().replace(/\t+/g, '').trim() + '\n';
+        });
+        // Remove spaces
+        text = text.split('\n').map((l) => l.trim()).join('\n');
+        // Remove empty lines
+        text = text.replace(/^\s*[\r\n]/gm, '');
+        const mb = text.indexOf(todayName);
+        const me = text.indexOf(':\n', mb + todayName.length + 1);
+        let menu = text.slice(mb, me);
+        // Remove line with next menu
+        if(me > 0) {
+            menu = menu.slice(0, menu.lastIndexOf('\n'));
+        }
+        return menu;
     }
 }
 
