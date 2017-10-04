@@ -93,12 +93,12 @@ class MenuChecker {
     }
 
     parseKovork(html) {
-        var json = JSON.parse(html);
+        const json = JSON.parse(html);
         if (json.data) {
             let menu = "";
-            for (var i = 0; i < 7; i++) {
-                var text = decodeURIComponent(json.data[i].message);
-                if (text.indexOf(moment().format('D.M.YYYY')) > -1) {
+            for (let i = 0; i < 7; i++) {
+                const text = decodeURIComponent(json.data[i].message);
+                if (text.includes(moment().format('D.M.YYYY'))) {
                     menu += text.replace(/\n\n/g, '\n');
                 }
             }
@@ -107,17 +107,17 @@ class MenuChecker {
     }
 
     parseZomato(html) {
-        var json = JSON.parse(html);
-        if (json['daily_menus']) {
+        const json = JSON.parse(html);
+        if (json.daily_menus) {
             let menu = [];
-            for (var daily_menu of json['daily_menus']) {
-                if (moment().isSame(daily_menu['daily_menu']['start_date'], 'day') &&
-                    daily_menu['daily_menu']['end_date'] !== undefined) {
-                    for (var dish of daily_menu['daily_menu']['dishes']) {
-                        menu.push(dish['dish']['name']);
-                    }
+            json.daily_menus.forEach(({daily_menu}) => {
+                if (moment().isSame(daily_menu.start_date, 'day') &&
+                    daily_menu.end_date !== undefined) {
+                    menu = daily_menu.dishes.map(({dish}) =>
+                        `${dish.name}   ${dish.price}`
+                    );
                 }
-            }
+            });
             return menu.join("\n");
         }      
     }
