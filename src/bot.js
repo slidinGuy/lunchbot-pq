@@ -46,28 +46,77 @@ class LunchBot extends Bot {
         restaurants.map((restaurant) => {
             const keyWords = restaurant.keyWords.map((k) => `:${k}:`);
             if (message.text && keyWords.some((kw) => message.text.includes(kw))) {
-                this.menuChecker.getMenu(restaurant)
-                    .then((menu) => this.createResponse(restaurant, menu))
-                    .then((response) => this.replyToMessage(message, response))
-                    .catch((e) => {
-                        console.log(e);
+                this.replyToMessage(message, restaurant)
+                    .then((msg) => {
+                        this.menuChecker.getMenu(restaurant)
+                            .then((menu) => this.createResponse(restaurant, menu))
+                            .then((response) => this.updateBotMessage(msg, response))
+                            .catch((e) => {
+                                this.updateBotMessage(
+                                    msg,
+                                    this.createErrorResponse(restaurant, e.message));
+                                console.log(e);
+                            });
                     });
             }
         });
     }
 
     createResponse(restaurant, menu) {
-        if (menu) {
-            return `${restaurant.response} \n\`\`\`${menu}\`\`\``;
-        } else {
-            return `${restaurant.response} Sorry, I couldn't find menu for today.`;
+        let message = menu;
+        if (!menu) {
+            message = "Sorry, I couldn't find menu for today.";
         }
+
+        return {
+            attachments: [
+                {
+                    fallback: restaurant.response,
+                    color: menu ? 'good' : 'warning',
+                    title: restaurant.response,
+                    title_link: restaurant.sourceType === 'web' ? restaurant.url : '',
+                    text: message
+                }
+            ],
+            as_user: false
+        };
     }
 
-    replyToMessage(originalMessage, response) {
-        this.postMessage(originalMessage.channel, response, {
-            as_user: true
-        })
+    createErrorResponse(restaurant, error) {
+        return {
+            attachments: [
+                {
+                    fallback: restaurant.response,
+                    color: 'danger',
+                    title: restaurant.response,
+                    title_link: restaurant.sourceType === 'web' ? restaurant.url : '',
+                    text: `Error: ${error}`
+                }
+            ],
+            as_user: false
+        };
+    }
+
+    createResponseHolder(restaurant) {
+        return {
+            attachments: [
+                {
+                    fallback: restaurant.response,
+                    title: restaurant.response,
+                    title_link: restaurant.sourceType === 'web' ? restaurant.url : '',
+                    text: "Getting menu..."
+                }
+            ],
+            as_user: false
+        };
+    }
+
+    replyToMessage(originalMessage, restaurant) {
+        return this.postMessage(originalMessage.channel, '', this.createResponseHolder(restaurant));
+    }
+
+    updateBotMessage(message, response) {
+        this.updateMessage(message.channel, message.ts, '', response);
     }
 }
 
