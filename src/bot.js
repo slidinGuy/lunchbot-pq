@@ -1,10 +1,7 @@
 'use strict';
 
-const util = require('util');
-const request = require('request');
-const cheerio = require('cheerio');
-const moment = require('moment');
 const Bot = require('slackbots');
+const MenuChecker = require('./menu-checker');
 
 // Restaurants definition
 const restaurants = require('./restaurants.json');
@@ -14,8 +11,10 @@ class LunchBot extends Bot {
         super(settings);
         this.name = 'lunchbot';
         this.user = null;
-        this.fb_token = settings.fb_token;
-        this.zomato_token = settings.zomato_token;
+        this.menuChecker = new MenuChecker({
+            fb_token: settings.fb_token,
+            zomato_token: settings.zomato_token
+        });
     }
 
     handleOnStart() {
@@ -33,10 +32,11 @@ class LunchBot extends Bot {
     }
 
     isChannelMessage(message) {
-        return (message.type === 'message') &&
-            Boolean(message) &&
-            (typeof (message.channel) === 'string') && ['C', 'G', 'D'].includes(message.channel[0]);
-    }
+        return message &&
+            (message.type === 'message') &&
+            (typeof (message.channel) === 'string') &&
+            ['C', 'G', 'D'].includes(message.channel[0]);
+   }
 
     isFromLunchBot(message) {
         return message.user === this.user.id;
@@ -46,136 +46,77 @@ class LunchBot extends Bot {
         restaurants.map((restaurant) => {
             const keyWords = restaurant.keyWords.map((k) => `:${k}:`);
             if (message.text && keyWords.some((kw) => message.text.includes(kw))) {
-                this.getMenu(restaurant)
-                    .then((menu) => this.createResponse(restaurant, menu))
-                    .then((response) => this.replyToMessage(message, response))
-                    .catch((e) => {
-                        console.log(e);
+                this.replyToMessage(message, restaurant)
+                    .then((msg) => {
+                        this.menuChecker.getMenu(restaurant)
+                            .then((menu) => this.createResponse(restaurant, menu))
+                            .then((response) => this.updateBotMessage(msg, response))
+                            .catch((e) => {
+                                this.updateBotMessage(
+                                    msg,
+                                    this.createErrorResponse(restaurant, e.message));
+                                console.log(e);
+                            });
                     });
             }
         });
     }
 
     createResponse(restaurant, menu) {
-        if (menu) {
-            return `${restaurant.response} \n\`\`\`${menu}\`\`\``;
-        } else {
-            return `${restaurant.response} Sorry, I couldn't find menu for today.`;
+        let message = menu;
+        if (!menu) {
+            message = "Sorry, I couldn't find menu for today.";
         }
-    }
 
-    replyToMessage(originalMessage, response) {
-        this.postMessage(originalMessage.channel, response, {
-            as_user: true
-        })
-    }
-
-    getMenu(restaurant) {
-        switch (restaurant.type) {
-            case 'basta': return this.getBasta(restaurant);
-            case 'jarosi': return this.getJarosi(restaurant);
-            case 'kovork': return this.getKovork(restaurant);
-            case 'zomato': return this.getZomato(restaurant);
-        }
-    }
-
-    getData (url, options) {
-        return new Promise(function (resolve, reject) {
-            request(Object.assign({url}, options),
-                function (error, response, body) {
-                    if (error) {
-                        reject(error);
-                    } else {
-                        resolve(body);
-                    }
+        return {
+            attachments: [
+                {
+                    fallback: restaurant.response,
+                    color: menu ? 'good' : 'warning',
+                    title: restaurant.response,
+                    title_link: restaurant.sourceType === 'web' ? restaurant.url : '',
+                    text: message
                 }
-            );
-        });
+            ],
+            as_user: false
+        };
     }
 
-    getBasta(restaurant) {
-        return this.getData(restaurant.url)
-            .then((html) => {
-                const $ = cheerio.load(html);
-                let menu = [];
-                $('.daily-item.today li').each(function () {
-                    menu.push($(this).text().replace(/\s+/g, ' ').trim());
-                });
-                return menu.join("\n");
-            });
-    }
-
-    getJarosi(restaurant) {
-        return this.getData(restaurant.url)
-            .then((html) => {
-                const $ = cheerio.load(html);
-                const days = ["Pondělí", "Úterý", "Středa", "Čtvrtek", "Pátek"];
-                const today = moment().day() - 1;
-                let menu = [];
-                $('tr').each(function (i, el) {
-                    let text = $(this).text().replace(/\n/g, '').replace(/\s+/g, ' ').trim();
-                    if (!menu.length && text.indexOf(days[today]) == 0) {
-                        menu.push(text.trim());
-                    } else if (menu.length) {
-                        if (text.indexOf(days[today + 1]) > -1 || menu.length > 5) {
-                            return;
-                        } else {
-                            menu.push(text);
-                        }
-                    }
-                });
-                if (menu.length) {
-                    return menu.join("\n");
+    createErrorResponse(restaurant, error) {
+        return {
+            attachments: [
+                {
+                    fallback: restaurant.response,
+                    color: 'danger',
+                    title: restaurant.response,
+                    title_link: restaurant.sourceType === 'web' ? restaurant.url : '',
+                    text: `Error: ${error}`
                 }
-            });
+            ],
+            as_user: false
+        };
     }
 
-    getKovork(restaurant) {
-        const url =  `${restaurant.url}?access_token=${this.fb_token}`;
-        return this.getData(url)
-            .then((html) => {
-                var json = JSON.parse(html);
-                if (json.data) {
-                    let menu = "";
-                    for (var i = 0; i < 7; i++) {
-                        var text = decodeURIComponent(json.data[i].message);
-                        if (text.indexOf(moment().format('D.M.YYYY')) > -1) {
-                            menu += text.replace(/\n\n/g, '\n');
-                        }
-                    }
-                    return  menu;
+    createResponseHolder(restaurant) {
+        return {
+            attachments: [
+                {
+                    fallback: restaurant.response,
+                    title: restaurant.response,
+                    title_link: restaurant.sourceType === 'web' ? restaurant.url : '',
+                    text: "Getting menu..."
                 }
-            });
+            ],
+            as_user: false
+        };
     }
 
-    createZomatoUrl(id) {
-        return `https://developers.zomato.com/api/v2.1/dailymenu?res_id=${id}`;
+    replyToMessage(originalMessage, restaurant) {
+        return this.postMessage(originalMessage.channel, '', this.createResponseHolder(restaurant));
     }
 
-    getZomato(restaurant) {
-        const self = this;
-        const url = this.createZomatoUrl(restaurant.id);
-        return this.getData(url,
-            {
-                headers: {
-                    'user_key': self.zomato_token
-                }
-            })
-            .then((html) => {
-                var json = JSON.parse(html);
-                if (json['daily_menus']) {
-                    let menu = [];
-                    for (var daily_menu of json['daily_menus']) {
-                        if (moment().isSame(daily_menu['daily_menu']['start_date'], 'day') &&
-                            daily_menu['daily_menu']['end_date'] !== undefined) {
-                            for (var dish of daily_menu['daily_menu']['dishes']) {
-                                menu.push(dish['dish']['name']);
-                            }
-                        }
-                    }
-                    return menu.join("\n");
-                }
-            });
+    updateBotMessage(message, response) {
+        this.updateMessage(message.channel, message.ts, '', response);
     }
 }
 
