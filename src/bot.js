@@ -74,7 +74,7 @@ class LunchBot extends Bot {
                     fallback: restaurant.response,
                     color: menu ? 'good' : 'warning',
                     title: restaurant.response,
-                    title_link: restaurant.sourceType === 'web' ? restaurant.url : '',
+                    title_link: this.menuChecker.getRestaurantWebUrl(restaurant),
                     text: message
                 }
             ],
@@ -89,7 +89,7 @@ class LunchBot extends Bot {
                     fallback: restaurant.response,
                     color: 'danger',
                     title: restaurant.response,
-                    title_link: restaurant.sourceType === 'web' ? restaurant.url : '',
+                    title_link: this.menuChecker.getRestaurantWebUrl(restaurant),
                     text: `Error: ${error}`
                 }
             ],
@@ -103,7 +103,7 @@ class LunchBot extends Bot {
                 {
                     fallback: restaurant.response,
                     title: restaurant.response,
-                    title_link: restaurant.sourceType === 'web' ? restaurant.url : '',
+                    title_link: this.menuChecker.getRestaurantWebUrl(restaurant),
                     text: "Getting menu..."
                 }
             ],

@@ -15,9 +15,9 @@
     },
     {
         "keyWords": ["kovork", "ostrava"],
-        "url": "https://graph.facebook.com/v2.10/kavarnakovork/feed",
+        "fbId": "kavarnakovork",
         "response": "Kovork:",
-        "type": "kovork",
+        "type": "fb-post",
         "sourceType": "fb"
     },
     {

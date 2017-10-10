@@ -23,7 +23,7 @@ class MenuChecker {
         switch (restaurant.sourceType) {
             case 'web': return this.getData(restaurant.url);
             case 'fb': {
-                const url =  `${restaurant.url}?access_token=${this.fb_token}`;
+                const url = `https://graph.facebook.com/v2.10/${restaurant.fbId}/feed?access_token=${this.fb_token}`;
                 return this.getData(url)
             }
             case 'zomato': {
@@ -38,11 +38,18 @@ class MenuChecker {
         }
     }
 
+    getRestaurantWebUrl (restaurant) {
+        switch (restaurant.sourceType) {
+            case 'web': return restaurant.url;
+            case 'fb': return `https://www.facebook.com/${restaurant.fbId}`;
+        }
+    }
+
     parseRestaurantData (restaurantType, data) {
         switch (restaurantType) {
             case 'basta': return this.parseBasta(data);
             case 'jarosi': return this.parseJarosi(data);
-            case 'kovork': return this.parseKovork(data);
+            case 'fb-post': return this.parseFBPost(data);
             case 'zomato': return this.parseZomato(data);
             case 'laudon': return this.parseLaudon(data);
         };
@@ -93,7 +100,7 @@ class MenuChecker {
         }
     }
 
-    parseKovork(html) {
+    parseFBPost(html) {
         const json = JSON.parse(html);
         if (json.data) {
             let menu = "";
