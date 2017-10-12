@@ -15,9 +15,9 @@
     },
     {
         "keyWords": ["kovork", "ostrava"],
-        "url": "https://graph.facebook.com/v2.10/kavarnakovork/feed",
+        "fbId": "kavarnakovork",
         "response": "Kovork:",
-        "type": "kovork",
+        "type": "fb-post",
         "sourceType": "fb"
     },
     {
@@ -75,5 +75,12 @@
         "response": "Laudon:",
         "type": "laudon",
         "sourceType": "web"
+    },
+    {
+        "keyWords": ["spagetarna", "mamamia", "jicin"],
+        "fbId": "523252117862585",
+        "response": "Spaghetteria Mamma Mia:",
+        "type": "fb-post",
+        "sourceType": "fb"
     }
 ]
