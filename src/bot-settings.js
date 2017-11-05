@@ -16,7 +16,7 @@ module.exports = {
     // Default is false,
     // when value is true, then all responses will be in new thread.
     // value could be also list of channel names
-    replyInThread: ["jicin"],
+    replyInThread: ["nj-office"],
 
     // When command is used without parameter
     // bot could use dafault value for channel
