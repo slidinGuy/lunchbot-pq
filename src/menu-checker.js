@@ -105,7 +105,7 @@ class MenuChecker {
         if (json.data) {
             let menu = "";
             for (let i = 0; i < 7; i++) {
-                const text = decodeURIComponent(json.data[i].message);
+                const text = json.data[i].message;
                 if (text.includes(moment().format('D.M.YYYY'))) {
                     menu += text.replace(/\n\n/g, '\n');
                 }
