@@ -46,13 +46,14 @@ class MenuChecker {
     }
 
     parseRestaurantData (restaurantType, data) {
+        const today = moment();
         switch (restaurantType) {
             case 'basta': return this.parseBasta(data);
-            case 'jarosi': return this.parseJarosi(data);
-            case 'fb-post': return this.parseFBPost(data);
-            case 'zomato': return this.parseZomato(data);
-            case 'laudon': return this.parseLaudon(data);
-        };
+            case 'jarosi': return this.parseJarosi(data, today);
+            case 'fb-post': return this.parseFBPost(data, today);
+            case 'zomato': return this.parseZomato(data, today);
+            case 'laudon': return this.parseLaudon(data, today);
+        }
     }
 
     getData (url, options) {
@@ -78,10 +79,10 @@ class MenuChecker {
         return menu.join("\n");
     }
 
-    parseJarosi(html) {
+    parseJarosi(html, date) {
         const $ = cheerio.load(html);
         const days = ["Pondělí", "Úterý", "Středa", "Čtvrtek", "Pátek"];
-        const today = moment().day() - 1;
+        const today = date.day() - 1;
         let menu = [];
         $('tr').each(function (i, el) {
             let text = $(this).text().replace(/\n/g, '').replace(/\s+/g, ' ').trim();
@@ -100,13 +101,13 @@ class MenuChecker {
         }
     }
 
-    parseFBPost(html) {
+    parseFBPost(html, date) {
         const json = JSON.parse(html);
         if (json.data) {
             let menu = "";
             for (let i = 0; i < 7; i++) {
                 const text = json.data[i].message;
-                if (text.includes(moment().format('D.M.YYYY'))) {
+                if (text.includes(date.format('D.M.YYYY'))) {
                     menu += text.replace(/\n\n/g, '\n');
                 }
             }
@@ -114,12 +115,12 @@ class MenuChecker {
         }
     }
 
-    parseZomato(html) {
+    parseZomato(html, date) {
         const json = JSON.parse(html);
         if (json.daily_menus) {
             let menu = [];
             json.daily_menus.forEach(({daily_menu}) => {
-                if (moment().isSame(daily_menu.start_date, 'day') &&
+                if (date.isSame(daily_menu.start_date, 'day') &&
                     daily_menu.end_date !== undefined) {
                     menu = daily_menu.dishes.map(({dish}) =>
                         `${dish.name}   ${dish.price}`
@@ -130,10 +131,10 @@ class MenuChecker {
         }      
     }
 
-    parseLaudon(html) {
+    parseLaudon(html, date) {
         const $ = cheerio.load(html);
         const days = ["Pondělí", "Úterý", "Středa", "Čtvrtek", "Pátek"];
-        const today = moment().day() - 1;
+        const today = date.day() - 1;
         const todayName = days[today];
         let text = "";
         $('div.text-tab-content').each(function () {
