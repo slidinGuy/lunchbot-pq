@@ -4,11 +4,15 @@ const cheerio = require('cheerio');
 
 function parseData(html) {
     const $ = cheerio.load(html);
-    let menu = [];
+    let text = [];
     $('.daily-item.today li').each(function () {
-        menu.push($(this).text().replace(/\s+/g, ' ').trim());
+        text.push($(this).text().replace(/\s+/g, ' ').trim());
     });
-    return menu.join("\n");
+    text = text.join("\n");
+    return {
+        found: (text.length > 0),
+        message: text
+    };
 }
 
 module.exports = parseData;

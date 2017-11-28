@@ -18,12 +18,15 @@ function parseData(html, date) {
     text = text.replace(/^\s*[\r\n]/gm, '');
     const mb = text.indexOf(todayName);
     const me = text.indexOf(':\n', mb + todayName.length + 1);
-    let menu = text.slice(mb, me);
+    let message = text.slice(mb, me);
     // Remove line with next menu
-    if(me > 0) {
-        menu = menu.slice(0, menu.lastIndexOf('\n'));
+    if (me > 0) {
+        message = message.slice(0, message.lastIndexOf('\n'));
     }
-    return menu;
+    return {
+        found: (message.length > 0),
+        message
+    };
 }
 
 module.exports = parseData;
