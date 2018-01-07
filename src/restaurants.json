@@ -1,86 +1,124 @@
 [
     {
-        "keyWords": ["basta", "ostrava"],
+        "keyWords": [
+            "basta",
+            "ostrava"
+        ],
         "url": "http://www.pustkoveckabasta.cz/pustkovecka-basta",
         "response": "Basta:",
         "type": "basta",
         "sourceType": "web"
     },
     {
-        "keyWords": ["jarosi", "ostrava"],
+        "keyWords": [
+            "jarosi",
+            "ostrava"
+        ],
         "url": "http://www.ujarosu.cz/cz/denni-menu/",
         "response": "Jarosi:",
         "type": "jarosi",
         "sourceType": "web"
     },
     {
-        "keyWords": ["kovork", "ostrava"],
+        "keyWords": [
+            "kovork",
+            "ostrava"
+        ],
         "fbId": "kavarnakovork",
         "response": "Kovork:",
-        "type": "fb-post",
+        "type": "kovork",
         "sourceType": "fb"
     },
     {
-        "keyWords": ["daniela", "jicin"],
+        "keyWords": [
+            "daniela",
+            "jicin"
+        ],
         "id": "16513150",
         "response": "Daniela:",
         "type": "zomato",
         "sourceType": "zomato"
     },
     {
-        "keyWords": ["uzvonu", "jicin"],
+        "keyWords": [
+            "uzvonu",
+            "jicin"
+        ],
         "id": "16514019",
         "response": "Penzion U Zvonu:",
         "type": "zomato",
         "sourceType": "zomato"
     },
     {
-        "keyWords": ["artcafe", "jicin"],
+        "keyWords": [
+            "artcafe",
+            "jicin"
+        ],
         "id": "16513855",
         "response": "Art Cafe:",
         "type": "zomato",
         "sourceType": "zomato"
     },
     {
-        "keyWords": ["nano", "jicin"],
+        "keyWords": [
+            "nano",
+            "jicin"
+        ],
         "id": "16513503",
         "response": "Pizzeria Nano:",
         "type": "zomato",
         "sourceType": "zomato"
     },
     {
-        "keyWords": ["cech", "jicin"],
+        "keyWords": [
+            "cech",
+            "jicin"
+        ],
         "id": "16525386",
         "response": "Cechovní dům:",
         "type": "zomato",
         "sourceType": "zomato"
     },
     {
-        "keyWords": ["colores", "jicin"],
+        "keyWords": [
+            "colores",
+            "jicin"
+        ],
         "id": "16513597",
         "response": "Colores:",
         "type": "zomato",
         "sourceType": "zomato"
     },
     {
-        "keyWords": ["mexiko", "mexico", "jicin"],
+        "keyWords": [
+            "mexiko",
+            "mexico",
+            "jicin"
+        ],
         "id": "16513586",
         "response": "Mexico Chiquito:",
         "type": "zomato",
         "sourceType": "zomato"
     },
     {
-        "keyWords": ["laudon", "jicin"],
+        "keyWords": [
+            "laudon",
+            "jicin"
+        ],
         "url": "http://www.laudon-nj.cz/denni-menu.php",
         "response": "Laudon:",
         "type": "laudon",
         "sourceType": "web"
     },
     {
-        "keyWords": ["spagetarna", "mamamia", "jicin"],
+        "keyWords": [
+            "spagetarna",
+            "mamamia",
+            "jicin"
+        ],
         "fbId": "523252117862585",
         "response": "Spaghetteria Mamma Mia:",
-        "type": "fb-post",
+        "type": "mama-mia",
         "sourceType": "fb"
     }
 ]

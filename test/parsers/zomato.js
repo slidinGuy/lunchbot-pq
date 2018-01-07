@@ -9,10 +9,13 @@ describe('Test parsers - Zomato', () => {
             .then((html) => {
                 const testDate = moment('23.10.2017', 'DD.MM.YYYY');
                 const menu = parseData(html, testDate);
-                assert.equal(menu,
-                    'Polévka rýžová se zeleninou /Bezlepkové jídlo/   \n' +
-                    '1. Cuketová omáčka, tofu, brambory   \n' +
-                    '2. Hrachová kaše, tempeh, okurek, pečivo /Bezlepkové jídlo/   '
+                assert.deepEqual(menu,
+                    {
+                        found: true,
+                        message: 'Polévka rýžová se zeleninou /Bezlepkové jídlo/   \n' +
+                            '1. Cuketová omáčka, tofu, brambory   \n' +
+                            '2. Hrachová kaše, tempeh, okurek, pečivo /Bezlepkové jídlo/   '
+                    }
                 );
                 done();
             })

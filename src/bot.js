@@ -37,7 +37,7 @@ class LunchBot extends Bot {
             (message.type === 'message') &&
             (typeof (message.channel) === 'string') &&
             ['C', 'G', 'D'].includes(message.channel[0]);
-   }
+    }
 
     isFromLunchBot(message) {
         return message.user === this.user.id;
@@ -45,7 +45,7 @@ class LunchBot extends Bot {
 
     checkMessageContent(message) {
         let text = message.text;
-        if (!text){
+        if (!text) {
             // Nothing to check
             return;
         }
@@ -56,7 +56,7 @@ class LunchBot extends Bot {
         // Check command
         text = this.checkCommandAndApplyDefaults(text, channel);
 
-        if (!text){
+        if (!text) {
             // Nothing to contine with
             return;
         }
@@ -66,10 +66,10 @@ class LunchBot extends Bot {
 
         restaurants.map((restaurant) => {
             let keyWords = restaurant.keyWords.map((k) => `:${k}:`);
-            if (botSettings.useSimpeKeyWordWithCommand && botSettings.command){
-                keyWords = keyWords.concat(restaurant.keyWords); 
+            if (botSettings.useSimpeKeyWordWithCommand && botSettings.command) {
+                keyWords = keyWords.concat(restaurant.keyWords);
             }
-            if (keyWords.some((kw) => new RegExp(`\\b${kw}\\b`,"i").test(text))) {
+            if (keyWords.some((kw) => new RegExp(`\\b${kw}\\b`, "i").test(text))) {
                 this.processMessage(message, restaurant);
             }
         });
@@ -77,7 +77,7 @@ class LunchBot extends Bot {
 
     getChannel(message) {
         return this.channels.find(ch => ch.id === message.channel);
-    }    
+    }
 
     checkCommandAndApplyDefaults(text, channel) {
         if (botSettings.command || botSettings.useBotNameAsCommand) {
@@ -127,19 +127,19 @@ class LunchBot extends Bot {
     }
 
     createResponse(restaurant, menu, threadId) {
-        let message = menu;
-        if (!menu) {
-            message = "Sorry, I couldn't find menu for today.";
+        if (!menu.found) {
+            menu.message = "Sorry, I couldn't find menu for today.";
         }
 
         return {
             attachments: [
                 {
                     fallback: restaurant.response,
-                    color: menu ? 'good' : 'warning',
+                    color: menu.found ? 'good' : 'warning',
                     title: restaurant.response,
                     title_link: this.menuChecker.getRestaurantWebUrl(restaurant),
-                    text: message
+                    text: menu.message,
+                    image_url: menu.image
                 }
             ],
             thread_ts: threadId,
@@ -185,7 +185,7 @@ class LunchBot extends Bot {
                 if (channel && botSettings.replyInThread.includes(channel.name)) {
                     return message.ts;
                 }
-            } else { 
+            } else {
                 return message.ts;
             }
         }
