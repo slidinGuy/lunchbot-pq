@@ -11,7 +11,7 @@ function parseData(html, date) {
         let text = [];
         json.daily_menus.forEach(({ daily_menu }) => {
             if (date.isSame(daily_menu.start_date, 'day') &&
-                daily_menu.end_date !== undefined) {
+                daily_menu.end_date) {
                 text = daily_menu.dishes.map(({ dish }) =>
                     `${dish.name}   ${dish.price}`
                 );

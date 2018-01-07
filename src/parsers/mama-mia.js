@@ -13,9 +13,8 @@ function parseData(html, date) {
         for (let i = 0; i < 7; i++) {
             const text = json.data[i].message;
             const attachments = json.data[i].attachments;
-            if (text != undefined &&
-                text.toLowerCase().includes(days[today].toLowerCase()) &&
-                attachments != undefined) {
+            if (text && attachments &&
+                text.toLowerCase().includes(days[today].toLowerCase())) {
                 menu = {
                     found: true,
                     image: attachments.data[0].media.image.src
