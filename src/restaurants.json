@@ -31,6 +31,17 @@
     },
     {
         "keyWords": [
+            "jack",
+            "burger",
+            "ostrava"
+        ],
+        "id": "16525845",
+        "response": "Jack's Burger:",
+        "type": "zomato",
+        "sourceType": "zomato"
+    },
+    {
+        "keyWords": [
             "daniela",
             "jicin"
         ],
