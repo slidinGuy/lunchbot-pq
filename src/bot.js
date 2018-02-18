@@ -50,6 +50,11 @@ class LunchBot extends Bot {
             return;
         }
 
+        // Remove reminder text from message
+        if (botSettings.allowReminder) {
+            text = this.removeReminderFromMessage(text)
+        }
+
         // Get message channel info
         const channel = this.getChannel(message);
 
@@ -75,6 +80,13 @@ class LunchBot extends Bot {
         });
     }
 
+    removeReminderFromMessage(text) {
+        if (text.startsWith('Reminder: ') && text.endsWith('.')) {
+            return text.slice(10, text.length - 1)
+        }
+        return text
+    }
+
     getChannel(message) {
         return this.channels.find(ch => ch.id === message.channel);
     }
@@ -83,8 +95,10 @@ class LunchBot extends Bot {
         if (botSettings.command || botSettings.useBotNameAsCommand) {
             if (botSettings.command && text.startsWith(botSettings.command)) {
                 text = text.slice(botSettings.command.length, text.length).trim();
-            } else if (botSettings.useBotNameAsCommand && text.startsWith(`<@${this.user.id}>`)) {
-                text = text.slice(this.user.id.length + 3, text.length).trim();
+            } else if (botSettings.useBotNameAsCommand &&
+                (text.startsWith(`<@${this.user.id}>`) || text.startsWith(`<@${this.user.id}|`))
+            ) {
+                text = text.slice(text.indexOf('>') + 1, text.length).trim()
             } else {
                 // Command or name are defined but message is not starting with it
                 return;
