@@ -12,7 +12,7 @@ describe('Test parsers - Kovork', () => {
                 assert.deepEqual(menu,
                     {
                         found: true,
-                        message: 'PONDĚLÍ 23.10.2017\n' +
+                        message: 'PONDĚLÍ 23. 10.\n' +
                             'BROKOLICOVÝ KRÉM\n' +
                             'MEXICKÁ TORTILLA S KUŘECÍM MASEM (80G), SÝREM, RAJČATY, CIBULKOU A HOŘČIČNÝM DRESINGEM, SMAŽENÉ HRANOLKY A SALÁT COLESLAW\n' +
                             '119,- \n' +
