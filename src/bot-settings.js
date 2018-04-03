@@ -12,6 +12,11 @@ module.exports = {
     // eg. "!lunch ostrava" but emoji will still works "!lunch :ostrava:"
     useSimpeKeyWordWithCommand: true,
 
+    // Allow command in slack remnider
+    // Expected reminder strucutre "Reminder: message."
+    // eg. "/remind #ostrava-office @lunchbot at 11:00"
+    allowReminder: true,
+
     // Bot can reply in thread to not make mess in communication in the channel
     // Default is false,
     // when value is true, then all responses will be in new thread.
