@@ -131,5 +131,16 @@
         "response": "Spaghetteria Mamma Mia:",
         "type": "mama-mia",
         "sourceType": "fb"
+    },
+    {
+        "keyWords": [
+            "menza",
+            "vsb",
+            "ostrava"
+        ],
+        "url": "https://stravovani.vsb.cz/webkredit/ZalozkaObjednavani.aspx",
+        "response": "Menza:",
+        "type": "menza",
+        "sourceType": "web"
     }
 ]
