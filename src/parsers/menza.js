@@ -6,8 +6,9 @@ const moment = require('moment');
 function parseData(html) {
   const $ = cheerio.load(html);
   let message = [];
+  let portions = $('td.TdAltNazev + td').text()
   $('td.TdAltNazev').each(function(i, el) {
-      message.push($(this).text());
+      message.push(`${i}. ${$(this).text()}, zbývá porcí: ${portions[i-1]}`);
   })
   message.shift();
   if (message[message.length-1].includes("/výdej u oběda/")) {
