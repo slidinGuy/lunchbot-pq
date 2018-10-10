@@ -11,7 +11,7 @@ function parseData(html, date) {
         let message = "";
         for (let i = 0; i < 7; i++) {
             const text = json.data[i].message;
-            if (text.includes(date.format('D.M.'))) {
+            if (text.includes(date.format('D.M.')) || text.includes(date.format('D. M.'))) {
                 message += text.replace(/\n\n/g, '\n');
             }
         }
