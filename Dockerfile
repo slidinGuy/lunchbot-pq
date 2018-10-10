@@ -16,4 +16,4 @@ RUN npm install
 COPY . .
 
 EXPOSE 8080
-RUN /set_test_env.sh
+ENTRYPOINT ["./set_test_env.sh"]
