@@ -5,8 +5,8 @@ const cheerio = require('cheerio');
 function parseData(html) {
     const $ = cheerio.load(html);
     let text = [];
-    $('.daily-item.today li').each(function () {
-        text.push($(this).text().replace(/\s+/g, ' ').trim());
+    $('.daily-item.today li').each(function (i) {
+        text.push(`${i+1}. ${$(this).text().replace(/\s+/g, ' ').trim()}`);
     });
     text = text.join("\n");
     return {
